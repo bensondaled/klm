@@ -4,7 +4,7 @@ analysis = 'colocalization' # foci / colocalization / membrane
 
 # Parameters for each type of analysis
 foci_kw = dict(channel=1) # 0=red, 1=green, 2=blue
-colocalization_kw = dict(channel_a=0, channel_b=1)
+colocalization_kw = dict(channel_a=1, channel_b=2)
 membrane_kw = dict(channel=1) # 0=red, 1=green, 2=blue
 
 # Run the analysis
