@@ -52,6 +52,8 @@ def compute_foci_idx(cell, channel=0, method=np.var):
     method: probably should be np.var or np.std
     '''
     pixels = cell['pixels']
+    if pixels.shape[-1]==1:
+        channel=0
     return method(pixels[:,channel], ddof=1)
 
 def compute_coloc(cell, channel_a, channel_b):
@@ -60,7 +62,7 @@ def compute_coloc(cell, channel_a, channel_b):
     pixels = cell['pixels']
     return np.corrcoef(pixels[:,channel_a], pixels[:,channel_b])[0,1]
 
-def compute_membrane_localization(cell):
+def compute_membrane_localization(cell, channel=0):
     '''Membrane localization, computed as center of mass of pixel intensity divided by cell radius
     
     img: image containing cell
@@ -68,14 +70,18 @@ def compute_membrane_localization(cell):
     '''
     mask = cell['mask']
     img = cell['full_img']
+    
+    if img.shape[-1]==1:
+        channel=0
 
     cell_coords = np.argwhere(mask)
+    cell_coords_w = np.where(mask)
     cell_center = cell_coords.mean(axis=0)
     cell_area = np.sum(mask)
     cell_radius = np.sqrt(cell_area / np.pi)
-    intensities = np.array([img[c] for c in cell_coords])
+    intensities = img[...,channel][cell_coords_w]
     dists = np.array([dist(cell_center, c) for c in cell_coords])
-    com = np.mean(intensities * dists)
+    com = np.mean(intensities * dists[:,None,None])
     ml = com / cell_radius
     return ml
 
@@ -109,12 +115,16 @@ def cells_generator(folder):
 
         # read in original image and masks from cellprofiler
         img = imread(img_path).squeeze()
-        channel_dim = np.argmin(img.shape)
-        if channel_dim != img.ndim-1:
-            if channel_dim != 0:
-                raise Exception('Cannot determine channel dimension.')
-            img = np.rollaxis(img, 0, img.ndim)
         mask = imread(mask_path).squeeze()
+        if img.ndim>2:
+            channel_dim = np.argmin(img.shape)
+            if channel_dim != img.ndim-1:
+                if channel_dim != 0:
+                    raise Exception('Cannot determine channel dimension.')
+                img = np.rollaxis(img, 0, img.ndim)
+                mask = np.rollaxis(mask, 0, mask.ndim)
+        elif img.ndim==2:
+            img = img[...,None]
         labels,nlab = label(mask)
             
         # iterate through cells
