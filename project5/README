@@ -1,0 +1,4 @@
+How to run this pipeline:
+
+(1) Use the "segment" pipeline in CellProfiler to find cells and save them out.
+(2) Use the analyze.py script to run the analysis of interest on the cells.
