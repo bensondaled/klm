@@ -47,14 +47,17 @@ class Analysis():
             self.result.to_csv(self.save_path)
             print(f'Result saved to {self.save_path}.')
 
-def compute_foci_idx(cell, channel=0, method=np.var):
+def compute_foci_idx(cell, channel=0, method=np.std, normalize=True):
     '''
     method: probably should be np.var or np.std
     '''
     pixels = cell['pixels']
     if pixels.shape[-1]==1:
         channel=0
-    return method(pixels[:,channel], ddof=1)
+    pix = pixels[:,channel]
+    if normalize:
+        pix = (pix-pix.min())/(pix.max()-pix.min())
+    return method(pix, ddof=1)
 
 def compute_coloc(cell, channel_a, channel_b):
     '''Colocalization between two channels, defined simply as pearson's r

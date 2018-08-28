@@ -7,7 +7,7 @@ fs = [(d,f) for d in dirs for f in os.listdir(d) if f.endswith('.lif')]
 
 ##
 
-bfconvert_path = '/Users/ben/code/korrie/project2/lif2tif/bftools/bfconvert'
+bfconvert_path = '/Users/ben/code/klm/project2/lif2tif/bftools/bfconvert'
 
 for d,f in fs:
     rootname = os.path.splitext(f)[0]
