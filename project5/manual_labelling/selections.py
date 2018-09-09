@@ -32,7 +32,9 @@ class UI():
         img = imread(self.path).squeeze()
 
         if (self.multi_channel is False) and (img.ndim > 2):
-            img = img.sum(axis=-1)
+            chandim = np.argmin(img.shape)
+            img = img.sum(axis=chandim)
+            img = (img-img.min())/(img.max()-img.min())
         elif (self.multi_channel is True) and img.ndim==2:
             self.multi_channel = False
     
@@ -68,7 +70,9 @@ class UI():
             for i in range(img.shape[chandim]):
                 sls = [slice(None,None) for i in range(img.ndim)]
                 sls[chandim] = i
-                imgi = clahe(img[sls])
+                img_s = img[sls]
+                img_s = (img_s-img_s.min())/(img_s.max()-img_s.min())
+                imgi = clahe(img_s)
                 self.imgs.append(imgi)
 
             self.chan_idx = 0

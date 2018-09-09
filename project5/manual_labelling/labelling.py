@@ -5,8 +5,9 @@ Manually label individual cells, displayed randomly one by one
 ##
 
 # Parameters
-data_path = '/Users/kmack/Desktop/completed images/asyn/11.14.14/tifs and npys'
+data_path = '/Users/ben/Desktop/images/'
 allowed_answers = ['y','n','i']
+multi_channel = True  # must be False or True
 
 ##
 
@@ -52,10 +53,29 @@ with open(out_path, 'r') as f:
 
 # main loop: randomly select a cell, display it, and store result
 pad = 5
+fig,axs = pl.subplots(2,2); axs=axs.ravel()
+global chan_idx
+chan_idx = 0
+imgs,imgs_clahe,clims_clahe = [],[],[]
+_im0=_im1=_im2=_im3=None
 def press(evt):
     global pressed
+    global chan_idx
     pressed = evt.key
-fig,axs = pl.subplots(2,2); axs=axs.ravel()
+    
+    if (multi_channel is True) and (pressed == 't'):
+        chan_idx += 1
+        if chan_idx >= len(imgs):
+            chan_idx = 0
+        _im0.set_data(imgs[chan_idx])
+        _im0.set_clim(vmin=imgs[chan_idx].min(), vmax=imgs[chan_idx].max())
+        _im1.set_data(imgs_clahe[chan_idx])
+        _im1.set_clim(vmin=clims_clahe[chan_idx][0], vmax=clims_clahe[chan_idx][1])
+        _im2.set_data(imgs[chan_idx])
+        _im2.set_clim(vmin=imgs[chan_idx].min(), vmax=imgs[chan_idx].max())
+        _im3.set_data(imgs_clahe[chan_idx])
+        _im3.set_clim(vmin=clims_clahe[chan_idx][0], vmax=clims_clahe[chan_idx][1])
+        fig.canvas.draw()
 fig.canvas.mpl_connect('key_press_event', press)
 while True:
     if len(cells) == 0:
@@ -71,15 +91,46 @@ while True:
     
     selection_data = np.load(info['npy_path'])
     img = imread(info['tif_path'])
-    img_clahe = clahe(img)
+
+    if (multi_channel is False) and (img.ndim > 2):
+        chandim = np.argmin(img.shape)
+        img = img.sum(axis=chandim)
+        img = (img-img.min())/(img.max()-img.min())
+    elif (multi_channel is True) and img.ndim==2:
+        multi_channel = False
+    
     cell_params = selection_data[cellid]
     x,y,r = cell_params
-    y0 = int(max(y-r-pad, 0))
-    x0 = int(max(x-r-pad, 0))
-    y1 = int(min(y+r+pad, img.shape[0]))
-    x1 = int(min(x+r+pad, img.shape[1]))
-    cell_img = img[y0:y1, x0:x1]
-    cell_img_clahe = img_clahe[y0:y1, x0:x1]
+    
+    if multi_channel is False:
+        img_clahe = clahe(img)
+        cvmin,cvmax = img_clahe.min(), img_clahe.max()
+        cell_img = img[y0:y1, x0:x1]
+        cell_img_clahe = img_clahe[y0:y1, x0:x1]
+    else:
+        imgs,imgs_clahe = [],[]
+        chandim = np.argmin(img.shape)
+        for i in range(img.shape[chandim]):
+            sls = [slice(None,None) for i in range(img.ndim)]
+            sls[chandim] = i
+            img_ch = img[sls]
+            img_ch_norm = (img_ch-img_ch.min())/(img_ch.max()-img_ch.min())
+            img_clahe_ch = clahe(img_ch_norm)
+            cvmin,cvmax = img_clahe_ch.min(), img_clahe_ch.max()
+            y0 = int(max(y-r-pad, 0))
+            x0 = int(max(x-r-pad, 0))
+            y1 = int(min(y+r+pad, img_ch.shape[0]))
+            x1 = int(min(x+r+pad, img_ch.shape[1]))
+            cell_img = img_ch[y0:y1, x0:x1]
+            cell_img_clahe = img_clahe_ch[y0:y1, x0:x1]
+
+            imgs.append(cell_img)
+            imgs_clahe.append(cell_img_clahe)
+            clims_clahe.append((cvmin,cvmax))
+
+        cell_img = imgs[chan_idx]
+        cell_img_clahe = imgs_clahe[chan_idx]
+        cvmin,cvmax = clims_clahe[chan_idx]
 
     for ax in axs:
         ax.clear()
@@ -87,10 +138,10 @@ while True:
     axs[0].set_title(f'{len(cells)} cells remaining')
     axs[1].set_title('Allowed responses:\n'+str(allowed_answers))
 
-    axs[0].imshow(cell_img, cmap=pl.cm.Greys_r)
-    axs[1].imshow(cell_img_clahe, cmap=pl.cm.Greys_r, vmin=img_clahe.min(), vmax=img_clahe.max())
-    axs[2].imshow(cell_img, cmap=pl.cm.viridis)
-    axs[3].imshow(cell_img_clahe, cmap=pl.cm.viridis, vmin=img_clahe.min(), vmax=img_clahe.max())
+    _im0 = axs[0].imshow(cell_img, cmap=pl.cm.Greys_r)
+    _im1 = axs[1].imshow(cell_img_clahe, cmap=pl.cm.Greys_r, vmin=cvmin, vmax=cvmax)
+    _im2 = axs[2].imshow(cell_img, cmap=pl.cm.viridis)
+    _im3 = axs[3].imshow(cell_img_clahe, cmap=pl.cm.viridis, vmin=cvmin, vmax=cvmax)
     for ax in axs:
         ax.axis('off')
     
