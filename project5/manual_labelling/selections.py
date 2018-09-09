@@ -3,8 +3,8 @@ Select cells from images using a simple click interface
 '''
 
 # Parameters
-data_path = '/Users/kmack/Desktop/images'
-multi_channel = False  # must be False or True
+data_path = '/Users/ben/Desktop/images'
+multi_channel = True  # must be False or True
 ###
 
 import matplotlib
@@ -22,15 +22,19 @@ import sys
 warnings.filterwarnings("ignore")
 
 class UI():
-    def __init__(self, path, rois=None):
+    def __init__(self, path, rois=None, multi_channel=False):
 
         self.path = path
         #self.name = os.path.split(self.path)[-1]
         self.name = self.path
         self.name = os.path.splitext(self.name)[0]
+        self.multi_channel = multi_channel
         img = imread(self.path).squeeze()
-        if (multi_channel is False) and (img.ndim > 2):
+
+        if (self.multi_channel is False) and (img.ndim > 2):
             img = img.sum(axis=-1)
+        elif (self.multi_channel is True) and img.ndim==2:
+            self.multi_channel = False
     
         self.fig = pl.figure()#num=self.name)
         self.ax = self.fig.add_axes([0.01,0.01,.99,.99])
@@ -55,7 +59,7 @@ class UI():
                 self.ax.add_patch(p)
             self.update_patches()
         
-        if multi_channel is False:
+        if self.multi_channel is False:
             img = clahe(img)
             img0 = img
         else:
@@ -197,10 +201,11 @@ class UI():
 
         elif evt.key == 't':
             # toggle channel
-            self.chan_idx += 1
-            if self.chan_idx >= len(self.imgs):
-                self.chan_idx = 0
-            self._im.set_data(self.imgs[self.chan_idx])
+            if self.multi_channel:
+                self.chan_idx += 1
+                if self.chan_idx >= len(self.imgs):
+                    self.chan_idx = 0
+                self._im.set_data(self.imgs[self.chan_idx])
             
         if evt.key in ['1','2','9','0','t']:
             self.fig.canvas.draw()
@@ -240,7 +245,7 @@ class UI():
 
 if __name__ == '__main__':
 
-    print('1: decrease minimum\n2: increase minimum\n9: decrease maximum\n0: increase maximum\nz: undo\nx: delete mode\nv: hide/show selections\nt: toggle channel')
+    print('\nKey controls:\n\n1: decrease minimum\n2: increase minimum\n9: decrease maximum\n0: increase maximum\nz: undo\nx: delete mode\nv: hide/show selections\nt: toggle channel\n\n')
 
     try:
         flag = sys.argv[1]
@@ -266,5 +271,5 @@ if __name__ == '__main__':
                 else:
                     roi = None
                 print('Running {}.'.format(f))
-                ui = UI(f, rois=roi)
+                ui = UI(f, rois=roi, multi_channel=multi_channel)
                 break
