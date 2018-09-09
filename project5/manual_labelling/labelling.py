@@ -6,14 +6,14 @@ allowed_answers = ['y','n']
 
 ##
 
+import matplotlib
+matplotlib.use('tkagg')
+import matplotlib.pyplot as pl
 import os
 import numpy as np
 from skimage.io import imread
 from skimage.exposure import equalize_adapthist as clahe
 from collections import OrderedDict
-import matplotlib
-matplotlib.use('tkagg')
-import matplotlib.pyplot as pl
 pl.ion()
 
 tif_filenames = sorted([t for t in os.listdir(data_path) if t.endswith('.tif')])
