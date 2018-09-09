@@ -1,8 +1,12 @@
+'''
+Manually label individual cells, displayed randomly one by one
+'''
+
 ##
 
 # Parameters
-data_path = '/Users/ben/Desktop/km_data'
-allowed_answers = ['y','n']
+data_path = '/Users/kmack/Desktop/completed images/asyn/11.14.14/tifs and npys'
+allowed_answers = ['y','n','i']
 
 ##
 
