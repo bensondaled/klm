@@ -36,7 +36,7 @@ for nyp,tpath,nm in zip(npy_paths,tif_paths,names):
         ustr = f'{nm}_cell{l}'
         cells[ustr] = dict(npy_path=nyp, tif_path=tpath)
 
-out_filename = 'label_log.txt'
+out_filename = 'label_log.csv'
 out_path = os.path.join(data_path, out_filename)
 
 if not os.path.exists(out_path):

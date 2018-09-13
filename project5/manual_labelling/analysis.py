@@ -3,7 +3,7 @@ Copy labels into a spreadsheet for further analysis.
 '''
 
 # Parameters
-label_file = '/Users/kmack/Desktop/completed images/asyn/11.14.14/tifs and npys/label_log.txt'
+label_file = '/Users/kmack/Desktop/completed images/asyn/11.14.14/tifs and npys/label_log.csv'
 
 #####
 import numpy as np
