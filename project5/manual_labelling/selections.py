@@ -258,6 +258,10 @@ if __name__ == '__main__':
 
     fs = os.listdir(data_path)
     fs = sorted([os.path.join(data_path,f) for f in fs if f.endswith('.tif')])
+    
+    # randomize order:
+    np.random.shuffle(fs)
+
     fnames = [os.path.splitext(f)[0] for f in fs]
     outs = [f+'.npy' for f in fnames]
 
