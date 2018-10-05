@@ -105,6 +105,10 @@ while True:
     if multi_channel is False:
         img_clahe = clahe(img)
         cvmin,cvmax = img_clahe.min(), img_clahe.max()
+        y0 = int(max(y-r-pad, 0))
+        x0 = int(max(x-r-pad, 0))
+        y1 = int(min(y+r+pad, img.shape[0]))
+        x1 = int(min(x+r+pad, img.shape[1]))
         cell_img = img[y0:y1, x0:x1]
         cell_img_clahe = img_clahe[y0:y1, x0:x1]
     else:
