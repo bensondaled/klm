@@ -8,6 +8,7 @@ Manually label individual cells, displayed randomly one by one
 data_path = '/Users/ben/Desktop/images/'
 allowed_answers = ['y','n','i']
 multi_channel = True  # must be False or True
+ignore_channels = [1] # a list of channels to eliminate/ignore, ex. [1,2]
 
 ##
 
@@ -115,6 +116,8 @@ while True:
         imgs,imgs_clahe = [],[]
         chandim = np.argmin(img.shape)
         for i in range(img.shape[chandim]):
+            if i in ignore_channels:
+                continue
             sls = [slice(None,None) for i in range(img.ndim)]
             sls[chandim] = i
             img_ch = img[sls]

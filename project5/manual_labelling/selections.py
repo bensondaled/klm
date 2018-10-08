@@ -5,6 +5,8 @@ Select cells from images using a simple click interface
 # Parameters
 data_path = '/Users/ben/Desktop/images'
 multi_channel = True  # must be False or True
+ignore_channels = [1] # a list of channels to eliminate/ignore, ex. [1,2]
+
 ###
 
 import matplotlib
@@ -68,6 +70,8 @@ class UI():
             self.imgs = []
             chandim = np.argmin(img.shape)
             for i in range(img.shape[chandim]):
+                if i in ignore_channels:
+                    continue
                 sls = [slice(None,None) for i in range(img.ndim)]
                 sls[chandim] = i
                 img_s = img[sls]

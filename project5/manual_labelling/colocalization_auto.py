@@ -6,6 +6,7 @@ Compute colocalization scores based on manual selections
 
 # Parameters
 data_path = '/Users/ben/Desktop/images/'
+channels_to_compare = [0,1] # list of two channel indices to compute colocalization across
 
 # include_list : optional, path to label file containing only cells to use; use value None if want to include all cells
 include_list = '/Users/ben/Desktop/images/label_log.csv'
@@ -67,14 +68,16 @@ for cellid in cells.keys():
 
     im = imread(tif_path)
     assert im.ndim==3, 'Channels not found; greyscale image.'
-    assert im.shape[0]==2, '2 channels not found.'
+    #assert im.shape[0]==2, '2 channels not found.'
     sel = np.load(npy_path)
 
     cell = sel[celli]
     y0,y1,x0,x1 = get_bbox(cell, im.shape[1:])
     box = im[:,y0:y1,x0:x1]
 
-    r = np.corrcoef(box[0].ravel(), box[1].ravel())[0,1]
+    chani0,chani1 = channels_to_compare
+
+    r = np.corrcoef(box[chani0].ravel(), box[chani1].ravel())[0,1]
     
     with open(coloc_path, 'a') as f:
         f.write(f'{cellid},{r}\n')
