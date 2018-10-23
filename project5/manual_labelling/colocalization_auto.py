@@ -68,6 +68,8 @@ for cellid in cells.keys():
 
     im = imread(tif_path)
     assert im.ndim==3, 'Channels not found; greyscale image.'
+    chandim = np.argmin(im.shape)
+    im = np.rollaxis(im, chandim)
     #assert im.shape[0]==2, '2 channels not found.'
     sel = np.load(npy_path)
 
